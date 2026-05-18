@@ -604,7 +604,6 @@ export function BookTicket() {
 
           {step === 6 && (
             <div className="section-fade-in" style={{ textAlign: 'center' }}>
-              <div style={{ fontSize: '4rem', color: 'var(--success)', marginBottom: '24px' }}>󰄬</div>
               <h2 style={{ fontSize: '2.5rem', fontWeight: '900', marginBottom: '16px' }}>READY FOR THE EVENT</h2>
               <p style={{ color: 'var(--text-dim)', marginBottom: '40px' }}>Review your final statement and initialize the secure pass.</p>
               
