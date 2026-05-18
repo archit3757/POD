@@ -32,6 +32,89 @@ const getEventPrice = (event) => {
   return prices[event.id] || 1500;
 };
 
+export function triggerConfetti() {
+  if (document.getElementById('confetti-canvas')) return;
+
+  const canvas = document.createElement('canvas');
+  canvas.id = 'confetti-canvas';
+  canvas.style.position = 'fixed';
+  canvas.style.top = '0';
+  canvas.style.left = '0';
+  canvas.style.width = '100vw';
+  canvas.style.height = '100vh';
+  canvas.style.pointerEvents = 'none';
+  canvas.style.zIndex = '999999';
+  document.body.appendChild(canvas);
+
+  const ctx = canvas.getContext('2d');
+  let width = canvas.width = window.innerWidth * window.devicePixelRatio;
+  let height = canvas.height = window.innerHeight * window.devicePixelRatio;
+  ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+
+  const handleResize = () => {
+    width = canvas.width = window.innerWidth * window.devicePixelRatio;
+    height = canvas.height = window.innerHeight * window.devicePixelRatio;
+    if (ctx) ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+  };
+  window.addEventListener('resize', handleResize);
+
+  const colors = ['#FF5F6D', '#FFC371', '#36D1DC', '#5B86E5', '#2ECC71', '#F1C40F', '#9B59B6'];
+  const particles = [];
+
+  for (let i = 0; i < 180; i++) {
+    particles.push({
+      x: Math.random() * window.innerWidth,
+      y: -20 - Math.random() * 150,
+      r: 4 + Math.random() * 6,
+      d: Math.random() * 150,
+      color: colors[Math.floor(Math.random() * colors.length)],
+      tilt: Math.random() * 10 - 5,
+      tiltAngleIncremental: Math.random() * 0.07 + 0.02,
+      tiltAngle: 0,
+      speedX: Math.random() * 6 - 3,
+      speedY: 2 + Math.random() * 4
+    });
+  }
+
+  let animationFrameId;
+  const startTime = Date.now();
+
+  function draw() {
+    ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
+
+    let active = false;
+    particles.forEach((p) => {
+      p.tiltAngle += p.tiltAngleIncremental;
+      p.y += p.speedY;
+      p.x += p.speedX + Math.sin(p.tiltAngle) * 0.5;
+      p.tilt = Math.sin(p.tiltAngle - p.r / 2) * 15;
+
+      if (p.y <= window.innerHeight + 10) {
+        active = true;
+      }
+
+      ctx.beginPath();
+      ctx.lineWidth = p.r;
+      ctx.strokeStyle = p.color;
+      ctx.moveTo(p.x + p.tilt + p.r / 2, p.y);
+      ctx.lineTo(p.x + p.tilt, p.y + p.tilt + p.r / 2);
+      ctx.stroke();
+    });
+
+    if (active && Date.now() - startTime < 6000) {
+      animationFrameId = requestAnimationFrame(draw);
+    } else {
+      cancelAnimationFrame(animationFrameId);
+      window.removeEventListener('resize', handleResize);
+      if (document.body.contains(canvas)) {
+        document.body.removeChild(canvas);
+      }
+    }
+  }
+
+  draw();
+}
+
 // --- Constants ---
 const ADDONS = [
   { id: 'guide', name: 'Guide to Seat', desc: 'Personal assistance to your seat', price: 250, free: false },
@@ -283,6 +366,7 @@ export function BookTicket() {
 
     await addRecord(STORES.bookings, newBooking);
     addToast('Booking Initialized Successfully', 'success');
+    triggerConfetti();
     navigate(`/ticket?data=${encodedData}`);
   };
 
@@ -770,6 +854,7 @@ export function TicketPreview() {
         };
         
         setTicketData(mappedData);
+        triggerConfetti();
       } catch (e) {
         console.error('Decoding failed', e);
         setError(true);
