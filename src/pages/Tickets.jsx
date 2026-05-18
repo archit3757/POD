@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
-import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
+import { useParams, useNavigate, useSearchParams, useLocation } from 'react-router-dom';
 import { QRCodeSVG } from 'qrcode.react';
 import { getAllRecords, getRecord, addRecord, putRecord, clearStore, STORES } from '../db/indexedDB';
 import { generateId, formatDate } from '../utils/helpers';
@@ -35,7 +35,7 @@ const getEventPrice = (event) => {
 // --- Constants ---
 const ADDONS = [
   { id: 'guide', name: 'Guide to Seat', desc: 'Personal assistance to your seat', price: 250, free: false },
-  { id: 'wheelchair', name: 'Wheelchair', desc: 'Complimentary mobility support', price: 0, free: true },
+  { id: 'wheelchair', name: 'Wheelchair', desc: 'Mobility support', price: 2500, free: false },
   { id: 'priority', name: 'Priority Entry', desc: 'Skip the main queue', price: 500, free: false },
   { id: 'refreshments', name: 'Refreshments Pack', desc: 'Pre-booked snacks & drinks', price: 750, free: false },
 ];
@@ -45,13 +45,11 @@ const GATES = ['GATE A1', 'GATE A2', 'GATE B1', 'GATE B2', 'GATE C1'];
 const PARKING_ZONES = [
   { id: 'far-1', name: 'Zone P-9 (Remote)', dist: '1.2 km', price: 0, base: true },
   { id: 'mid-1', name: 'Zone P-4 (Standard)', dist: '600 m', price: 200, base: false },
-  { id: 'near-1', name: 'Zone P-1 (Premium)', dist: '150 m', price: 500, base: false },
-  { id: 'vip-1', name: 'VIP Deck', dist: '50 m', price: 1000, base: false },
+  { id: 'near-1', name: 'Zone P-1 (Premium)', dist: '150 m', price: 399, base: false },
+  { id: 'vip-1', name: 'VIP Deck', dist: '50 m', price: 599, base: false },
 ];
 
-const MOCK_PEOPLE = [
-  { id: 'p1', name: 'Archit Jain', aadhaar: 'XXXXXXXX1234', verified: true },
-];
+const MOCK_PEOPLE = [];
 
 // --- Events ---
 export function Events() {
@@ -96,7 +94,7 @@ export function Events() {
           />
         </div>
         <div className="filter-tabs" style={{ flexWrap: 'wrap' }}>
-          {['all', 'concert', 'sports', 'festival'].map(f => (
+          {['all', 'concert', 'sports', 'performance'].map(f => (
             <button key={f} className={`filter-tab ${filter === f ? 'active' : ''}`} onClick={() => setFilter(f)}>
               {f.toUpperCase()}
             </button>
@@ -137,13 +135,16 @@ export function Events() {
 
 // --- BookTicket ---
 export function BookTicket() {
+  const location = useLocation();
+  const isPreSelected = !!location.state?.eventId;
+
   const [step, setStep] = useState(1);
   const [people, setPeople] = useState(MOCK_PEOPLE);
   const [selectedPeopleIds, setSelectedPeopleIds] = useState([]);
   const [newPerson, setNewPerson] = useState({ name: '', aadhaar: '', verifying: false, otp: '', otpSent: false });
   
   const [events, setEvents] = useState([]);
-  const [selectedEventId, setSelectedEventId] = useState('');
+  const [selectedEventId, setSelectedEventId] = useState(location.state?.eventId || '');
   
   const [selectedSeats, setSelectedSeats] = useState([]);
   const [selectedGate, setSelectedGate] = useState('');
@@ -179,11 +180,27 @@ export function BookTicket() {
     return { base, parkExtra, addonsTotal, taxes, total: subtotal + taxes };
   }, [event, selectedPeopleIds, parking, selectedAddons]);
 
-  const nextStep = () => setStep(s => s + 1);
-  const prevStep = () => setStep(s => s - 1);
+  const nextStep = () => {
+    if (step === 1 && isPreSelected) {
+      setStep(3);
+    } else {
+      setStep(s => s + 1);
+    }
+  };
+
+  const prevStep = () => {
+    if (step === 3 && isPreSelected) {
+      setStep(1);
+    } else {
+      setStep(s => s - 1);
+    }
+  };
 
   const handleAddPerson = () => {
-    if (people.length >= 10) return;
+    if (people.length >= 5) {
+      addToast('Maximum 5 verified people list limit reached', 'warning');
+      return;
+    }
     setNewPerson({ name: '', aadhaar: '', verifying: true, otp: '', otpSent: false });
   };
 
@@ -364,7 +381,9 @@ export function BookTicket() {
                 </button>
               )}
 
-              <button className="btn-premium" style={{ width: '100%', marginTop: '40px' }} disabled={selectedPeopleIds.length === 0} onClick={nextStep}>CONTINUE TO EVENTS</button>
+              <button className="btn-premium" style={{ width: '100%', marginTop: '40px' }} disabled={selectedPeopleIds.length === 0} onClick={nextStep}>
+                {isPreSelected ? 'CONTINUE TO SEAT SELECTION' : 'CONTINUE TO EVENTS'}
+              </button>
             </div>
           )}
 
@@ -570,7 +589,7 @@ export function BookTicket() {
                     </div>
                     <div style={{ fontSize: '0.7rem', color: 'var(--text-dim)', marginBottom: '12px' }}>{a.desc}</div>
                     <div style={{ fontWeight: '800', color: 'var(--primary)', fontSize: '0.85rem' }}>
-                      {a.price === 0 ? 'FREE' : (a.id === 'refreshments' ? `₹${a.price * Math.max(1, selectedPeopleIds.length)} (₹${a.price} x ${Math.max(1, selectedPeopleIds.length)})` : `₹${a.price}`)}
+                      {a.price === 0 ? 'FREE' : (a.id === 'refreshments' ? `₹${a.price * Math.max(1, selectedPeopleIds.length)} (₹${a.price} x ${Math.max(1, selectedPeopleIds.length)})` : (a.id === 'wheelchair' ? `₹${a.price} (refundable security deposit)` : `₹${a.price}`))}
                     </div>
                   </div>
                 ))}
