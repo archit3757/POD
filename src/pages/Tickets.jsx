@@ -801,13 +801,13 @@ export function TicketPreview() {
 
       <div className="glass-card" style={{ padding: '0', overflow: 'hidden', background: 'white', marginBottom: '40px', boxShadow: '0 30px 60px rgba(0,0,0,0.1)', border: 'none' }}>
         {/* Futuristic Header */}
-        <div style={{ padding: '60px 40px', background: 'var(--primary-gradient)', color: 'white', position: 'relative' }}>
+        <div className="ticket-header">
           <div style={{ position: 'absolute', top: '24px', right: '40px', fontSize: '0.7rem', fontWeight: '800', opacity: 0.8, letterSpacing: '4px' }}>
             ID: {ticketData.ticketNumber}
           </div>
           <div style={{ fontSize: '0.8rem', fontWeight: '800', letterSpacing: '2px', opacity: 0.9, marginBottom: '8px' }}>OFFICIAL EVENT PASS</div>
-          <h2 style={{ fontSize: '4rem', fontWeight: '900', lineHeight: '1', marginBottom: '20px', letterSpacing: '-2px' }}>{ticketData.eventName?.toUpperCase()}</h2>
-          <div style={{ display: 'flex', gap: '30px', fontSize: '1rem', fontWeight: '700' }}>
+          <h2 className="ticket-title">{ticketData.eventName?.toUpperCase()}</h2>
+          <div className="ticket-meta">
             <span>📅 {formatDate(ticketData.eventDate)}</span>
             <span>📍 {ticketData.eventVenue?.toUpperCase()}</span>
           </div>
@@ -815,9 +815,9 @@ export function TicketPreview() {
           <div style={{ position: 'absolute', bottom: '-15px', left: '40px', width: '30px', height: '30px', background: 'white', borderRadius: '50%' }}></div>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 320px', gap: '1px', background: 'rgba(0,0,0,0.05)' }}>
+        <div className="ticket-split-grid">
           {/* Detailed Info */}
-          <div style={{ padding: '50px 40px', background: 'white' }}>
+          <div className="ticket-info-panel">
             <div style={{ marginBottom: '50px' }}>
               <h3 style={{ fontSize: '0.75rem', color: 'var(--text-dim)', letterSpacing: '3px', fontWeight: '900', marginBottom: '24px' }}>VERIFIED ATTENDEES</h3>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
@@ -836,7 +836,7 @@ export function TicketPreview() {
               </div>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '40px', marginBottom: '50px' }}>
+            <div className="ticket-two-col" style={{ marginBottom: '50px' }}>
               <div>
                 <h3 style={{ fontSize: '0.7rem', color: 'var(--text-dim)', letterSpacing: '2px', fontWeight: '900', marginBottom: '10px' }}>ASSIGNED SEATS</h3>
                 <div style={{ fontWeight: '900', fontSize: '1.8rem', color: 'var(--primary)', letterSpacing: '-1px' }}>{ticketData.seats?.join(', ')}</div>
@@ -848,7 +848,7 @@ export function TicketPreview() {
               </div>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '40px' }}>
+            <div className="ticket-two-col">
               <div>
                 <h3 style={{ fontSize: '0.7rem', color: 'var(--text-dim)', letterSpacing: '2px', fontWeight: '900', marginBottom: '10px' }}>PARKING ZONE</h3>
                 <div style={{ fontWeight: '800', fontSize: '1.1rem' }}>{ticketData.parking?.name?.toUpperCase()}</div>
@@ -870,7 +870,7 @@ export function TicketPreview() {
           </div>
 
           {/* QR Scan Panel */}
-          <div style={{ padding: '50px 40px', background: 'rgba(0,0,0,0.015)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', borderLeft: '2px dashed rgba(0,0,0,0.05)' }}>
+          <div className="ticket-qr-panel">
             <div className="floating" style={{ background: 'white', padding: '24px', borderRadius: '32px', boxShadow: '0 20px 40px rgba(0,0,0,0.08)', marginBottom: '30px' }}>
               <QRCodeSVG value={`${window.location.origin}/ticket?data=${dataParam}`} size={240} level="M" />
             </div>
@@ -882,7 +882,7 @@ export function TicketPreview() {
         </div>
 
         {/* Dynamic Payment Footer */}
-        <div style={{ padding: '40px', background: '#fdfdfd', borderTop: '1px solid rgba(0,0,0,0.05)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div className="ticket-footer">
           <div>
             <div style={{ fontSize: '0.7rem', color: 'var(--text-dim)', fontWeight: '900', letterSpacing: '1px' }}>PAYMENT STATUS</div>
             <div style={{ fontWeight: '900', fontSize: '1.1rem', color: 'var(--success)', display: 'flex', alignItems: 'center', gap: '8px' }}>

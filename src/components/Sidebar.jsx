@@ -18,7 +18,7 @@ export default function Sidebar() {
         className="mobile-toggle"
         onClick={() => setIsMobileOpen(!isMobileOpen)}
       >
-        {isMobileOpen ? '󰅖' : '󰀻'}
+        {isMobileOpen ? '✕' : '☰'}
       </button>
 
       {/* Sidebar Overlay for Mobile */}
